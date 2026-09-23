@@ -606,7 +606,7 @@ function brandProfile() {
   var b = myBrand(), u = me();
   return head("Brand profile", "This is what creators see when they open one of your briefs.") +
     '<div class="card" style="max-width:640px"><form id="brand-form"><div class="form-grid">' +
-    '<label class="field"><span>Brand name</span><input type="text" id="b-name" value="' + esc(b.name) + '" required></label>' +
+    '<label class="field"><span>Brand name</span><input type="text" id="b-name" value="' + esc(b.name) + '" disabled></label>' +
     '<label class="field"><span>Industry</span><select id="b-industry">' + CATEGORIES.map(function (c) { return '<option' + (b.industry === c ? " selected" : "") + ">" + c + "</option>"; }).join("") + "</select></label>" +
     '<label class="field"><span>Location</span><select id="b-loc">' + CITIES.map(function (c) { return '<option' + (b.location === c ? " selected" : "") + ">" + c + "</option>"; }).join("") + "</select></label>" +
     '<label class="field"><span>Contact email</span><input type="email" id="b-email" value="' + esc(u.email) + '" required></label>' +
@@ -708,8 +708,8 @@ function creatorProfile() {
   }).join("");
   return head("My profile", "Brands score you on these numbers, so keep them current.") +
     '<div class="card" style="max-width:700px"><form id="inf-form"><div class="form-grid">' +
-    '<label class="field"><span>Handle</span><input type="text" id="i-handle" value="' + esc(i.handle) + '" required></label>' +
-    '<label class="field"><span>Name</span><input type="text" id="i-name" value="' + esc(i.name) + '" required></label>' +
+    '<label class="field"><span>Handle</span><input type="text" id="i-handle" value="' + esc(i.handle) + '" disabled></label>' +
+    '<label class="field"><span>Name</span><input type="text" id="i-name" value="' + esc(i.name) + '" disabled></label>' +
     '<label class="field"><span>Category</span><select id="i-cat">' + CATEGORIES.map(function (c) { return "<option" + (i.category === c ? " selected" : "") + ">" + c + "</option>"; }).join("") + "</select></label>" +
     '<label class="field"><span>Location</span><select id="i-loc">' + CITIES.map(function (c) { return "<option" + (i.location === c ? " selected" : "") + ">" + c + "</option>"; }).join("") + "</select></label>" +
     '<label class="field"><span>Followers</span><input type="number" id="i-fol" min="0" step="1000" value="' + i.followers + '" required></label>' +
@@ -988,8 +988,27 @@ document.addEventListener("submit", function (e) {
     var plats = PLATFORMS.filter(function (p) { var el = document.getElementById("p-" + p); return el && el.checked; });
     if (!plats.length) { ie.textContent = "Pick at least one platform you actually post on."; return; }
     var handle = val("i-handle");
+    var name = val("i-name");
+
+    if (!name) {
+      ie.textContent = "Please enter your name.";
+      return;
+    }
+
+    if (!/^[A-Za-z ]+$/.test(name)) {
+      ie.textContent = "Name can contain letters and spaces only.";
+      return;
+    }
+
+    if (name.replace(/ /g, "").length < 2) {
+      ie.textContent = "Name must contain at least 2 letters.";
+      return;
+    }
+
     i.handle = handle.charAt(0) === "@" ? handle : "@" + handle;
-    i.name = val("i-name"); i.category = val("i-cat"); i.location = val("i-loc");
+    i.name = name;
+    i.category = val("i-cat");
+    i.location = val("i-loc");
     i.followers = Number(val("i-fol")) || 0;
     i.engagement = Number(val("i-eng")) || 0;
     i.rate = Number(val("i-rate")) || 0;
@@ -1003,7 +1022,27 @@ document.addEventListener("submit", function (e) {
 
   if (form.id === "brand-form") {
     var b = myBrand(), bu = me();
-    b.name = val("b-name"); b.industry = val("b-industry"); b.location = val("b-loc"); b.about = val("b-about");
+    var brandName = val("b-name");
+
+    if (!brandName) {
+      alert("Please enter your brand name.");
+      return;
+    }
+
+    if (!/^[A-Za-z ]+$/.test(brandName)) {
+      alert("Brand name can contain letters and spaces only.");
+      return;
+    }
+
+    if (brandName.replace(/ /g, "").length < 2) {
+      alert("Brand name must contain at least 2 letters.");
+      return;
+    }
+
+    b.name = brandName;
+    b.industry = val("b-industry");
+    b.location = val("b-loc");
+    b.about = val("b-about");
     bu.email = val("b-email");
     save(); toast("Brand profile saved.", "good"); render();
   }
